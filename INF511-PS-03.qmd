@@ -1,0 +1,261 @@
+---
+title: "Problem Set 3"
+subtitle: "INF 511"
+author: "Purnabhishek Sripathi"
+fig-align: center
+fig-cap-location: bottom
+number-sections: true
+format: 
+    pdf: 
+        documentclass: article
+        geometry: 
+          - top=1in
+          - left=0.75in
+          - bottom=1in
+          - right=0.75in
+editor: source
+---
+
+# Exploring uncertainty in $\hat{B}$
+
+Here is a simulated data set for simple linear regression.
+
+```{r}
+set.seed(5)
+
+# Model parameters
+betas = c(1.5, -2.7)
+sigma = 2.2
+n = 50
+
+# Input variable
+x = runif(n, min = -2, max = 2)
+xmat = cbind(1, x)
+
+# Outcome variable
+y = xmat %*% betas + rnorm(n, 0, sigma)
+
+# plot
+plot(y ~ x, pch = 19)
+```
+## Run the `lm()` function
+
+Conduct a linear regression analysis on this data set using least squares via the `lm()`. 
+
+- Create a data frame to store your $y$ and $x$ variable. 
+```{r}
+# creating the dataframe
+#to store the x and y variables
+
+data_frame <- data.frame(y=y, x=x)
+data_frame
+```
+- Run the `lm()` function with an appropriate formula. Store the output in an object.
+```{r}
+#running the lm() function on the above data_frame
+
+result_data <- lm(y~x, data=data_frame)
+result_data
+```
+- Extract and report the estimated coefficients from the `lm()` output object.
+
+```{r}
+#fetching the coefficients of the result_data
+
+coeff_of_result_data <- coef(result_data)
+coeff_of_result_data
+```
+## Estimated residual variance
+
+Remember from lecture that the estimated residual variance can be obtained from:
+$$ \hat{\sigma}^2 = \frac{1}{n-p} \hat{\epsilon}^T \hat{\epsilon} $$,
+where $\hat{\epsilon}$ is the vector of estimated residuals. Below, create a function in R to compute the $\hat{\sigma}^2$. 
+
+```{r}
+
+n <- length(y)
+p <- length((coeff_of_result_data))
+n
+p
+
+```
+- Extract the estimated residuals from the `lm()` output. 
+```{r}
+#fetching th eestimated residuls of result_data
+
+residuals_of_result_data <- resid(result_data)
+residuals_of_result_data
+
+```
+```{r}
+#function to calculate the estimated residual variance!
+
+residual_function <- function(residual_data, p)
+{
+  residual_length <- length(result_data)
+  result_object <- sum(residual_data^2)/residual_length-p
+  return (result_object)
+}
+
+#result_object
+```
+
+```{r}
+#calculating the estimated_residual_variance
+
+#estimated_residual_variance <- sum(residuals_of_result_data^2)
+#result_object <- estimated_residual_variance/n-p
+#result_object
+
+result_object <- residual_function(residuals_of_result_data, p)
+result_object
+  
+```
+- Create a function, which has two inputs: (1) the estimated residual vector $\hat{\epsilon}$, and (2) the number of model coefficients, $p$. 
+- Report your estimated $\hat{\sigma}^2$ by using your function, storing the output as an object, and printing the value of that object. Remember, to "print" the value of your object in the rendered PDF, you do not need to use the `print()` function.
+
+
+## Calculate the $SE(\hat{\beta}_i)$
+
+- Calculate $(X^TX)^{-1}$, then
+- Calculate the $SE(\hat{\beta}_i)$ for both the slope and intercept, using your calculations of $(X^TX)^{-1}$ and $\hat{\sigma}^2$, above. 
+
+```{r}
+ones <- rep(1,n)
+xmat <- cbind(ones, x)
+#xmat
+
+t_xmat <- t(xmat)
+#t_xmat
+
+#Calculating the $(X^TX)^{-1}$
+xtran_inv <- solve(t_xmat %*% xmat)
+xtran_inv
+
+#calculating the covariane matrix to find the standard errors.
+covariance_matrix <- xtran_inv * result_object
+#covariance_matrix
+
+
+#calculating the slope and intercept 
+
+slope <- sqrt(covariance_matrix[1,1])
+intercept <- sqrt(covariance_matrix[2,2])
+
+cat(paste("SE_intercept:", intercept, "\n"))
+cat(paste("SE_slope:", slope, "\n"))
+
+```
+# Confidence Intervals
+
+## Calculate the $t_{critical}$
+
+Remember that to calculate confidence intervals for the slope and intercept, we need to calculate the critical $t$ value from the appropriate $t$ distribution with $\nu$ degrees of freedom. Calculate and report the $t_{critical}$ for the **90%** confidence interval.
+
+```{r}
+#calculating the T_critical value
+degree_freedom <- n-p
+
+t_critical <- qt(0.025, degree_freedom, lower.tail = FALSE)
+t_critical
+```
+## Calculate the confidence intervals
+
+For both slope and intercept, calculate the upper and lower bounds of the **90%** confidence interval, using the $t_{critical}$ and the $SE(\hat{\beta}_i)$ from above. Specifically, create a matrix or table to display: the estiamted coefficient from `lm()` output, as well as the upper and lower bounds of the **90%** confidence interval. Include both the slope and the intercept in the same matrix or table. You must use R to create the matrix or table. 
+
+```{r}
+interval = 1-0.90
+
+t_critical_val <- qt(1-interval/2, degree_freedom)
+
+val1 <- c(residuals_of_result_data[1]- t_critical_val* intercept)
+val2 <- c(residuals_of_result_data[1] + t_critical_val * intercept)
+
+intercept_ci <- c(val1, val2)
+intercept_ci
+
+valu1 <- c(residuals_of_result_data[2] - t_critical_val * slope)
+valu2 <- c(residuals_of_result_data[2] + t_critical_val * slope)
+
+slope_ci <-  c(valu1, valu2)
+slope_ci 
+```
+```{r}
+#calculating the upper and lower bounds
+
+name_coefficient <- c("Intercept", "Slope")
+estimate_coefficient <- c(residuals_of_result_data[1], residuals_of_result_data[2])
+
+lower_bound = c(intercept_ci[1], slope_ci[1])
+upper_bound = c(intercept_ci[2], slope_ci[2])
+
+confidence_inteval = data.frame(Coefficient = name_coefficient, Estimate = estimate_coefficient, 
+                      `Lower Bound` = lower_bound, `Upper Bound` = upper_bound)
+
+confidence_inteval
+```
+
+## Compare to `confint()`.
+
+Now, use the `confint()` function to calculate the **90%** confidence intervals for the slope and intercept, and display the output. 
+
+```{r}
+#calculating the confidence interval
+confi_inter <- confint(result_data, level = 0.9)
+confi_inter
+```
+# Prediction intervals with `predict()`
+
+We are going to use the `predict()` function to calculate the expected value of $y$ and the prediction interval around this expectation, given the least squares analysis stored in the `lm()` function output.
+
+```{r}
+#Predicting the expected value of y.
+flag_val <- 0.55
+expected_y <- predict(result_data, data = data.frame(x = flag_val))
+expected_y
+```
+## Create a new data frame
+
+Create a new data frame that stores a range of input variable $x$ that we want to use to predict values of $y$. Complete the code chunk below.
+```{r}
+ n_pred = 100
+ new_df = data.frame(
+   x = seq(from = -2, to = 2, length.out =  n_pred)
+ )
+ new_df
+```
+
+## Run the `predict()` function, including the `interval` and `level` options to specify the **90%** prediction intervals. 
+
+Finish the code chunk below.
+```{r}
+ y_pred = predict(
+   object = result_data,
+   newdata = new_df,
+   interval = "prediction",
+   level = 0.9
+ )
+```
+
+## Create the plot
+
+The plot below shows the data points and the relationship between $y$ and $x$. Add three lines to this plot, using the `lines()` function: (1) the expected value of $y$ given your linear regression analysis, (2) the upper prediction interval, and (3) the lower prediction interval. 
+```{r}
+#plot(y ~ x, pch = 19)
+
+#Plotting the data
+plot(y~x, xlab = "x-Axis", ylab = "y-Axis", main = "Relationship Between Y ~ X")
+#abline(result_object, col = "blue")
+
+#Adding the three lines to the plot using lines()
+lines(new_df$x, y_pred[, 1], col = "green", lty = 4)
+
+lines(new_df$x, y_pred[, 2], col = "violet", lty = 5)
+
+lines(new_df$x, y_pred[, 3], col = "yellow", lty = 6)
+```
+
+
+# Rendering
+
+Render this document as a `.PDF` file. Upload the rendered `.PDF` and the original `.QMD` onto BBLearn.

@@ -1,0 +1,171 @@
+---
+title: "Homework 1 (33 points)"
+subtitle: "Purnabhishek Sripathi"
+author: 
+  - name: "Purnabhishek Sripathi"
+  - name: "Sateesh Nuthalapati"
+  - name: "Mounika Maddi"
+number-sections: true
+format: 
+    pdf: 
+        documentclass: article
+        geometry: 
+          - top=1in
+          - left=0.75in
+          - bottom=1in
+          - right=0.75in
+editor: source
+---
+
+You can complete this assignment in teams of **one to three students**. However, **each student** will submit a copy of their team's completed assignment, via BbLearn. The **names of all team members** who participated on the assignment must be included in the `author` section of the `YAML`. Only one assignment per team will be selected and graded, with all team members receiving the same score, which will be recorded in BbLearn. Please ensure that all team members indicate the same names on their submitted assignments. Also note that any assignment that was completed in a team of four or more individuals will receive zero points. 
+
+You must submit this assignment as a `.qmd` file rendered as a `.pdf`. Submit both the `.qmd` and the `.pdf` to Bblearn. This will help in grading, especially to figure out if you had a bug in the code. 
+
+**NOTE**: All homeworks will be scaled to 100 points so that each homework is equally weighted in your grade.
+
+# Some R Basics
+
+## `faraway` package (1 point)
+
+Install the `faraway` package on your laptop (*do not show the code for this*). Then, in the code chunk below, load the `faraway` package for use. 
+
+```{r}
+# Load the `faraway` package
+library(faraway)
+```
+
+## Working with `data.frame` objects
+
+Here is an example data frame: 
+
+```{r}
+toy_df<- data.frame(
+    name=c("Fred", "Ethyl", "Ricky", "Lucy","Babalu"),
+    program=c("surfing", "surfing", "singing","singing", "dancing"),
+    gpa=c(3.2, 3.4, 3.4, 3.3, 4.0),
+    sat=c(1200, -999, 1300, 1250, 1600))
+summary(toy_df)
+toy_df$gpa
+mean(toy_df$gpa)
+
+toy_df$program
+toy_df2 <- toy_df
+class(toy_df2$program)
+toy_df2$program <- as.factor(toy_df2$program)
+class(toy_df2$program)
+levels(toy_df2$program)
+```
+
+### Summarize (1 point)
+
+Run the `summary()` function on the `toy_df` object. 
+
+### Subsetting (2 points)
+
+Use the `$` notation to subset the `gpa` column of the `toy_df` object, and use the `mean()` function to calculate the average of the column. 
+
+### Levels (4 points)
+
+You will need to use the `$` notation again to subset the `program` column of the `toy_df` object. Convert the `program` column, which is currently a `character` string, to a `factor` variable. Then, use the `levels()` function to print the levels of this new factor object.
+
+
+## Vectorized functions
+
+Use the following vector to complete the sub-tasks below:
+```{r}
+my_vec = seq(from=1,to=5,by=0.8)
+my_vec
+print(paste("length of my_vec is:",length(my_vec)))
+log(my_vec)
+```
+
+### Calculate the length of `my_vec`. (1 point)
+
+Use a built-in function within R to output the length of `my_vec`. 
+
+### Calculate the natural log of each element of `my_vec`. (1 point)
+
+Use a built-in function within R to output the natural log of each element of `my_vec`. This should be a single function on a single line of code (i.e., a vectorized function).
+
+
+# Probability distributions
+
+## Standard normal (5 points)
+
+Plot the probability distribution function (as a curve) that describes the "standard normal," which is the normal distribution with mean zero and standard deviation equal to one. In other words, plot $P(z | \mu = 0, \sigma = 1)$ for a range of continuous random variable $z$, where $z \sim N(\mu=0, \sigma^2=1)$. Make sure that $z$ ranges from -4 to 4. Label the axes appropriately. 
+```{r}
+curve(dnorm, -4, 4, lwd=2, axes = TRUE, xlab = "Z", ylab = "Y")
+
+```
+## CDF (2 points)
+
+Use R to calculate $P(z \le 1.645 | \mu = 0, \sigma = 1)$ (i.e., from the standard normal).
+```{r}
+pnorm(1.645, mean=0, sd=1, lower.tail=TRUE)
+```
+
+## Inverse CDF (2 points)
+
+Use the `qnorm()` to calculate the value of $z$ that delineates that 95% of the standard normal probability distribution falls below this value of $z$. This demonstrates the inverse CDF. You should see a relationship with the answer of the above question.
+```{r}
+z <- qnorm(.95, mean=0,sd=1)
+print(paste("Qnorm is:", z))
+```
+
+## Binomial distribution (5 points)
+
+Use R to plot the binomial probability mass function with $n=6$ (i.e., `size`=6) and $p=.25$. Because the binomial is a discrete probability distribution, your plot should be formatted similarly to the Poisson example from class. Be sure to label axes appropriately. 
+```{r}
+binomial_pmf <- dbinom(0:6, size=6, prob=.25)
+barplot(binomial_pmf,xlab="X-axis",ylab="Y-axis",main = "Binomial PMF", names.arg=0:6,col="yellow")
+```
+
+## CDF of Binomial (2 points)
+
+Use R to compute $P(Y \ge 2)$ when $Y \sim binomial(n=6, p=0.25)$. Be careful with the sign of the inequality. 
+```{r}
+print(pbinom(1, size=6, prob=0.25))
+```
+# Algebraic expressions
+
+You will need to have read Dr. Barber's Appendix A to complete these tasks. Consider $Y_1$ and $Y_2$, which are *independent* random variables with means (i.e., *expectations*) equal to $\mu_1$ and $\mu_2$, respectively, and variances $\sigma^2_1$ and $\sigma^2_2$, respectively. Answer the following:
+
+## What is the mean of the linear expression? (2 points)
+
+What is the mean of $2Y_1 + 5 + 8Y_2$? Use a LaTex-style equation to express your answer. 
+
+Here 'E' represent the mean.
+$$2E(Y_1) + 5 + 8E(Y_2)=2\mu_1 +8\mu_2 +5$$
+
+
+## What is the variance? (2 points)
+
+What is the variance of $2Y_1 + 5 + 8Y_2$? Use a LaTex-style equation to express your answer. 
+
+The variance of $2Y_1 + 5 + 8Y_2$ .Here 'Var' represents the variance.
+
+$$Var(2Y_1 + 5 + 8Y_2) = 4 Var(Y_1) + 64 Var(Y_2) + 2 * 2 * 8 * Cov(Y_1, Y_2)$$
+
+
+
+## What is the distribution? (2 points)
+
+If $Y_1$ and $Y_2$ are both normally distributed, what is the distribution of the linear combination $2Y_1 + 5 + 8Y_2$? Moreover, what are the parameters that describe this distribution?
+
+The Linear Distribution is also normally distributed and the 
+Parameters are : 
+
+Mean: $$2\mu_1 +8\mu_2 +5$$
+
+##
+Variance: $$4\sigma_1+ 64\sigma_2$$
+
+
+## What is the covariance? (1 point)
+
+What is the covariance between $Y_1$ and $Y_2$?
+
+
+The covariance of $Y_1$ and $Y_2$ is 0.
+Where both Y1 and Y2 are independent random variables.
+

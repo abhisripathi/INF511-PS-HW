@@ -1,0 +1,214 @@
+---
+title: "Homework 2 (17 points)"
+subtitle: "INF 511"
+author: 
+  - name: "Purnabhishek Sripathi"
+  - name: "Sateesh Nuthalapati"
+  - name: "Mounika Maddi"
+number-sections: true
+format: 
+    pdf: 
+        documentclass: article
+        geometry: 
+          - top=1in
+          - left=0.75in
+          - bottom=1in
+          - right=0.75in
+        include-in-header: 
+          text: 
+            \usepackage{amsmath}
+editor: source
+---
+
+You can complete this assignment in teams of **one to three students**. Different from HW-01, you will create your group by signing up in the "Groups" section of BbLearn. That way only one submission per group is necessary. Even if you are working alone, you must sign up as a "Group". The **names of all team members** who participated on the assignment must be included in the `author` section of the `YAML`. All team members receiving the same score.
+
+You must submit this assignment as a `.qmd` file rendered as a `.pdf`. Submit both the `.qmd` and the `.pdf` to Bblearn. **Any assignment that does not have both files will lose points.**
+
+**NOTE**: All homeworks will be scaled to 100 points so that each homework is equally weighted in your grade.
+
+# Matrix calculations
+
+Here are three matrices:
+```{r}
+A<- matrix(c(2,3,5,4,
+              1,5,7,8),
+            nrow=2,ncol=4, byrow=TRUE)
+B<- matrix(c(6,9,3,1),
+            nrow=1,ncol=4)
+C<- matrix(c(3,8,5,2,
+              8,6,1,4),
+            nrow=2,ncol=4, byrow=TRUE)
+```
+
+
+## Matrix subsetting (1 point)
+
+Use R to extract the element from matrix $A$ in the first row and third column. 
+```{r}
+third_column <- A[,3]
+third_column
+```
+## Matrix subsetting (1 point)
+
+Use R to extract the second column from matrix $A$ but maintain that as a `matrix` object (i.e., it should be a column vector, and the `is.matrix()` function should be `TRUE`).
+
+```{r}
+second_column <- A[,2,drop = FALSE]
+second_column
+is.matrix(second_column)
+```
+
+## Matrix algebra (1 point)
+
+Show the result of $A + C$.
+```{r}
+
+matrix_algebra <- A+C
+matrix_algebra
+```
+## Matrix algebra (1 point)
+
+Show the result of $AB^{T}$.
+```{r}
+#product of two matrices
+matrix_algebra2 <- A*as.vector(B)
+
+matrix_algebra2
+
+#the result of AB^{T}
+t(matrix_algebra2)
+```
+# Linear model matrices
+
+An input matrix $X$ and a column vector of observed data outputs $Y$ are created below:
+```{r}
+X<- matrix(c(1,1,1,1,1,1,4,1,2,3,3,4),ncol=2)
+Y<- matrix(c(16,5,10,15,13,22),ncol=1)
+ord<- order(Y)
+(X<- X[ord,])
+(Y<- Y[ord,,drop=FALSE])
+```
+
+
+## Calculate $X^{T}Y$ (1 point)
+```{r}
+#the X transpose y is:
+
+X
+Xt<- t(X)
+result <- Xt*as.vector(Y)
+result
+
+```
+
+## Calculate the crossproduct of column vector $Y$ (1 point)
+```{r}
+#crossproduct of Y:
+crossprod(Y)
+```
+
+## Use the `solve()` function to calculate $\hat{B}$ (2 points)
+```{r}
+
+#B_hat <- t(B)
+result_hat <- t(X)%*% X
+inverse <- solve(result_hat)
+B_hat <- inverse %*% result_hat
+B_hat
+```
+
+# Linear modeling with `lm()`
+
+## Data frame (1 point)
+
+Using the two data structures $Y$ and $X$ above, create a data frame with two columns: the output variable $Y$ and the single input variable that is represented in matrix $X$. 
+
+```{r}
+#creating dataframe
+
+d_fram <- data.frame("X" = c(X), "Y" = c(Y) )
+d_fram
+```
+## Simple linear regression (2 points)
+
+Use the `lm()` function to model $Y$ as a linear function of the single covariate in your data frame. Use the `data` option in the `lm()` function to specify where to locate the input and output variables (i.e., column names of the data frame). Report the estimated coefficients from the `lm()` results.
+
+```{r}
+simple_lm <- lm(Y~X, data = d_fram)
+simple_lm
+```
+```{r}
+
+simple_lmm <- lm(X~Y, data = d_fram)
+simple_lmm
+```
+## Simple linear regression (2 points)
+
+Now, run the `lm()` function again, but use the column vector $Y$ and the matrix $X$ as the inputs to the `lm()` function. You will need to you tell `lm()` not to internally populate a column of 1's because the $X$ matrix already has a column of 1's. Use $0+$ or $-1+$ in your formula. Again report the estimated coefficients to verify they are the same estimates as above. 
+```{r}
+lmm = lm(Y ~ X - 1)
+lmm
+```
+# Linear combinations with matrix notation
+
+Consider the linear combinations of the random variables, $Y_1$, $Y_2$, $Y_3$, and $Y_1$. *Note*: in the equation code below the $\&$ designates the position at which the two equations should be `aligned`.
+
+\begin{align}
+    W_1 &=  \frac{1}{3}(Y_1 + Y_2 + Y_3) - \frac{1}{4}(Y_4) \\
+    W_2 &=  \frac{1}{5}(Y_1 + Y_2) +  \frac{1}{2}(Y_3 + Y_4)
+\end{align}
+
+## State in matrix notation (2 point)
+
+State the linear combination as matrix notation. Essentially we can calculate the above as $ W = AY $, where $W$, $A$, and $Y$ are separate matrices (or column vectors). Below, use LaTeX notation to specify the elements and structure of these three matrices (or column vectors). 
+
+Here is an example of how to make a column vector in LaTex notation: 
+
+$$\begin{bmatrix}
+  w1 \\
+  w2
+\end{bmatrix}$$
+
+Here is an example of how to make a square matrix in LaTex notation: 
+
+$$\begin{bmatrix}
+  1/3 & 1/3 & 1/3 & -1/4 \\
+  1/5 & 1/5 & 1/2 &  1/2
+\end{bmatrix}$$
+
+$$\begin{bmatrix}
+  Y1 \\
+  Y2 \\
+  Y3 \\
+  Y4\\
+\end{bmatrix}$$
+$$\begin{bmatrix}
+  w1 \\
+  w2
+\end{bmatrix} = \begin{bmatrix}
+  1/3 & 1/3 & 1/3 & -1/4 \\
+  1/5 & 1/5 & 1/2 &  1/2
+\end{bmatrix} \begin{bmatrix}
+  Y1 \\
+  Y2 \\
+  Y3 \\
+  Y4\\
+\end{bmatrix}$$
+
+## Expected value (2 points)
+
+What is the expected value of matrix $W$, $E(W)$, in terms of the expected values of the random variables (e.g., $E(Y_1)$). 
+
+
+$$\begin{bmatrix}
+  E(w1) \\
+  E(w2)
+\end{bmatrix} = \begin{bmatrix}
+  1/3 & 1/3 & 1/3 & -1/4 \\
+  1/5 & 1/5 & 1/2 &  1/2
+\end{bmatrix} \begin{bmatrix}
+  E(Y1) \\
+  E(Y2) \\
+  E(Y3) \\
+  E(Y4)\\
+\end{bmatrix}$$
